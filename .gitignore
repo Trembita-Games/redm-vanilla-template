@@ -1,6 +1,9 @@
 # FXServer artifacts
 server/
 
+# FXServer console history
+.replxx_history
+
 # Runtime cache
 cache/
 
