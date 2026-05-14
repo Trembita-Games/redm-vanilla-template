@@ -1,0 +1,33 @@
+# FXServer artifacts
+server/
+
+# Runtime cache
+cache/
+
+# txAdmin runtime data
+txData/
+
+# Logs
+*.log
+logs/
+
+# Crash dumps
+crashes/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Environment files
+.env
+
+# Temporary files
+tmp/
+temp/
+
+# Node modules
+node_modules/
