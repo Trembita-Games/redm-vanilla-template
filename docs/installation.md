@@ -1,72 +1,35 @@
-# Installation Guide
-
-## Requirements
-
-- RedM
-- FXServer artifacts
-- Windows or Linux
-- Open ports:
-  - TCP 30120
-  - UDP 30120
-
 ---
 
-## Download FXServer Artifacts
+## Local Configuration
 
-Download the latest recommended FXServer artifacts from:
+This repository does not store secrets in `server.cfg`.
 
-https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
-
-Extract the artifacts into:
+Create a local configuration file:
 
 ```txt
-server/
+local.cfg
 ```
 
-Resulting structure:
-
-```txt
-redm-vanilla-template/
-├── server/
-├── resources/
-├── scripts/
-├── server.cfg
-└── permissions.cfg
-```
-
----
-
-## Starting the Server
-
-### Windows
-
-```powershell
-./scripts/start.cmd
-```
-
-### Linux
+You can copy the example file:
 
 ```bash
-chmod +x ./scripts/start.sh
-./scripts/start.sh
+cp local.example.cfg local.cfg
 ```
 
----
+On Windows PowerShell:
 
-## Connecting to the Server
-
-Open RedM and connect using:
-
-```txt
-connect YOUR_SERVER_IP:30120
+```powershell
+Copy-Item local.example.cfg local.cfg
 ```
 
-Or use the server browser.
+Then set your Cfx.re license key:
 
----
+```cfg
+sv_licenseKey "your_license_key"
+```
 
-## txAdmin
+You can create a license key at:
 
-txAdmin will automatically initialize during first startup.
+https://portal.cfx.re/keymaster
 
-Follow the web setup instructions displayed in the server console.
+`local.cfg` is ignored by Git and must not be committed.
