@@ -148,7 +148,7 @@ resources/
 ### Windows
 
 ```powershell
-./scripts/start.cmd
+./scripts/start.ps1
 ```
 
 ### Linux
