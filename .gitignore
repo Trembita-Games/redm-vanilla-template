@@ -4,6 +4,14 @@ server/
 # FXServer console history
 .replxx_history
 
+# External Cfx.re server data clone
+.cfx-server-data/
+
+# Runtime-installed default Cfx.re resources
+resources/\[system\]/*
+!resources/\[system\]/README.md
+!resources/\[system\]/.gitkeep
+
 # Runtime cache
 cache/
 
