@@ -18,7 +18,7 @@ Project documentation and setup guides for `redm-vanilla-template`.
 - [Root README](../README.md)
 - [Scripts Documentation](../scripts/README.md)
 - [Resources Documentation](../resources/README.md)
-- [Example Local Configuration](../local.example.cfg)
+- [Example Local Configuration](../local.cfg.example)
 - [Server Configuration](../server.cfg)
 - [Permissions Configuration](../permissions.cfg)
 

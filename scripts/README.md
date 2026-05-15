@@ -18,7 +18,7 @@ This script temporarily clones `citizenfx/cfx-server-data` and copies default re
 resources/[system]/
 ```
 
-It also creates `local.cfg` from `local.example.cfg` if `local.cfg` does not already exist.
+It also creates `local.cfg` from `local.cfg.example` if `local.cfg` does not already exist.
 
 ---
 

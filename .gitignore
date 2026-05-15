@@ -36,8 +36,9 @@ Thumbs.db
 # Environment files
 .env
 
-# Local secrets
+# Local configuration
 local.cfg
+permissions.cfg
 
 # Temporary files
 tmp/

@@ -1,0 +1,11 @@
+########################################
+# Local Secrets
+########################################
+
+# Required for server startup.
+# Create your key at https://portal.cfx.re/keymaster
+sv_licenseKey "changeme"
+
+# Optional Steam Web API key.
+# Required only if you want to use Steam authentication.
+set steam_webApiKey ""

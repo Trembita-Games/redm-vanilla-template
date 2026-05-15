@@ -1,10 +1,15 @@
 $ErrorActionPreference = "Stop"
 
 $RootPath = Resolve-Path (Join-Path $PSScriptRoot "..")
+
 $TempServerDataPath = Join-Path $RootPath ".cfx-server-data"
 $SystemResourcesPath = Join-Path $RootPath "resources/[system]"
-$LocalExamplePath = Join-Path $RootPath "local.example.cfg"
+
+$LocalExamplePath = Join-Path $RootPath "local.cfg.example"
 $LocalConfigPath = Join-Path $RootPath "local.cfg"
+
+$PermissionsExamplePath = Join-Path $RootPath "permissions.cfg.example"
+$PermissionsConfigPath = Join-Path $RootPath "permissions.cfg"
 
 Write-Host "RedM Vanilla Template Setup"
 Write-Host "Root path: $RootPath"
@@ -18,6 +23,32 @@ function Test-Command {
 
     $commandInfo = Get-Command $Command -ErrorAction SilentlyContinue
     return $null -ne $commandInfo
+}
+
+function Copy-ExampleConfigIfMissing {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $ExamplePath,
+
+        [Parameter(Mandatory = $true)]
+        [string] $TargetPath,
+
+        [Parameter(Mandatory = $true)]
+        [string] $ConfigName
+    )
+
+    if ((Test-Path -LiteralPath $ExamplePath) -and (-not (Test-Path -LiteralPath $TargetPath))) {
+        Write-Host "Creating $ConfigName from $(Split-Path -Leaf $ExamplePath)..."
+        Copy-Item -LiteralPath $ExamplePath -Destination $TargetPath
+        return
+    }
+
+    if (Test-Path -LiteralPath $TargetPath) {
+        Write-Host "$ConfigName already exists. Skipping $ConfigName creation."
+        return
+    }
+
+    Write-Host "$(Split-Path -Leaf $ExamplePath) was not found. Skipping $ConfigName creation."
 }
 
 if (-not (Test-Command "git")) {
@@ -48,21 +79,20 @@ Copy-Item -Path (Join-Path $SourceResourcesPath "*") -Destination $SystemResourc
 Write-Host "Removing temporary Cfx.re server data clone..."
 Remove-Item -LiteralPath $TempServerDataPath -Recurse -Force
 
-if ((Test-Path -LiteralPath $LocalExamplePath) -and (-not (Test-Path -LiteralPath $LocalConfigPath))) {
-    Write-Host "Creating local.cfg from local.example.cfg..."
-    Copy-Item -LiteralPath $LocalExamplePath -Destination $LocalConfigPath
-    Write-Host "Please edit local.cfg and set your sv_licenseKey value."
-}
-elseif (Test-Path -LiteralPath $LocalConfigPath) {
-    Write-Host "local.cfg already exists. Skipping local configuration creation."
-}
-else {
-    Write-Host "local.example.cfg was not found. Skipping local configuration creation."
-}
+Copy-ExampleConfigIfMissing `
+    -ExamplePath $LocalExamplePath `
+    -TargetPath $LocalConfigPath `
+    -ConfigName "local.cfg"
+
+Copy-ExampleConfigIfMissing `
+    -ExamplePath $PermissionsExamplePath `
+    -TargetPath $PermissionsConfigPath `
+    -ConfigName "permissions.cfg"
 
 Write-Host ""
 Write-Host "Setup completed."
 Write-Host "Next steps:"
 Write-Host "1. Download FXServer artifacts into the server/ directory."
 Write-Host "2. Set your license key in local.cfg."
-Write-Host "3. Start the server with scripts/start.ps1."
+Write-Host "3. Review permissions.cfg and adjust server permissions if needed."
+Write-Host "4. Start the server with scripts/start.ps1."
