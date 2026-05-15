@@ -7,6 +7,7 @@ Project documentation and setup guides for `redm-vanilla-template`.
 ## Main Guides
 
 - [Installation Guide](installation.md)
+- [Docker Guide](docker.md)
 - [Development Guide](development.md)
 - [Architecture Overview](architecture.md)
 - [Troubleshooting](troubleshooting.md)
@@ -19,8 +20,10 @@ Project documentation and setup guides for `redm-vanilla-template`.
 - [Scripts Documentation](../scripts/README.md)
 - [Resources Documentation](../resources/README.md)
 - [Example Local Configuration](../local.cfg.example)
+- [Example Permissions Configuration](../permissions.cfg.example)
+- [Example Docker Environment](../.env.example)
 - [Server Configuration](../server.cfg)
-- [Permissions Configuration](../permissions.cfg)
+- [Docker Compose Configuration](../docker-compose.yaml)
 
 ---
 
@@ -31,18 +34,33 @@ Project documentation and setup guides for `redm-vanilla-template`.
 1. Download or update FXServer artifacts.
 2. Install default Cfx.re resources.
 3. Create and configure `local.cfg`.
-4. Start the server.
+4. Review `permissions.cfg`.
+5. Start the server.
 
 See:
 
 - [Installation Guide](installation.md)
 - [Scripts Documentation](../scripts/README.md)
 
+---
+
+### Optional Database Setup
+
+The vanilla server does not require a database, but optional future modules may need one.
+
+For local MariaDB setup, see:
+
+- [Docker Guide](docker.md)
+
+---
+
 ### Troubleshooting Runtime Issues
 
 If the server or RedM client fails to start, check:
 
 - [Troubleshooting](troubleshooting.md)
+
+---
 
 ### Understanding the Project Structure
 
