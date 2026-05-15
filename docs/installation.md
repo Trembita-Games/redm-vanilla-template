@@ -16,8 +16,8 @@ The currently validated flow is Windows-based and uses PowerShell scripts.
 - 7-Zip
 - Windows
 - Open ports:
-    - TCP `30120`
-    - UDP `30120`
+  - TCP `30120`
+  - UDP `30120`
 
 Optional:
 
@@ -326,11 +326,23 @@ txAdmin should initialize during first startup.
 
 Follow the web setup instructions displayed in the server console.
 
+This repository already provides the main server configuration:
+
+```txt
+server.cfg
+```
+
+When possible, use the existing configuration instead of generating a new one.
+
 txAdmin runtime data is stored locally and ignored by Git:
 
 ```txt
 txData/
 ```
+
+See:
+
+- [txAdmin Setup](txadmin.md)
 
 ---
 

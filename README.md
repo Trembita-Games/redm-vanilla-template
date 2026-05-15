@@ -219,6 +219,7 @@ See:
 - [Documentation Index](docs/README.md)
 - [Installation Guide](docs/installation.md)
 - [Docker Guide](docs/docker.md)
+- [txAdmin Setup](docs/txadmin.md)
 - [Architecture Overview](docs/architecture.md)
 - [Development Guide](docs/development.md)
 - [Troubleshooting](docs/troubleshooting.md)

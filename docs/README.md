@@ -8,6 +8,7 @@ Project documentation and setup guides for `redm-vanilla-template`.
 
 - [Installation Guide](installation.md)
 - [Docker Guide](docker.md)
+- [txAdmin Setup](txadmin.md)
 - [Development Guide](development.md)
 - [Architecture Overview](architecture.md)
 - [Troubleshooting](troubleshooting.md)
@@ -51,6 +52,16 @@ The vanilla server does not require a database, but optional future modules may 
 For local MariaDB setup, see:
 
 - [Docker Guide](docker.md)
+
+---
+
+### txAdmin Setup
+
+If txAdmin opens during first startup, use the existing repository configuration flow.
+
+See:
+
+- [txAdmin Setup](txadmin.md)
 
 ---
 
