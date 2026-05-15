@@ -1,5 +1,7 @@
 # redm-vanilla-template
 
+[![Validate Repository](https://github.com/Trembita-Games/redm-vanilla-template/actions/workflows/validate.yaml/badge.svg)](https://github.com/Trembita-Games/redm-vanilla-template/actions/workflows/validate.yaml)
+
 Minimal vanilla-first RedM/RDR2 server infrastructure template focused on clean setup, reproducible local runtime and framework-agnostic architecture.
 
 Created and maintained by members of the Oxbay community under Trembita Games.

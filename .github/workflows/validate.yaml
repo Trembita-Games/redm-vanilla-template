@@ -1,0 +1,198 @@
+﻿name: Validate Repository
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate repository structure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required_files=(
+            "README.md"
+            "LICENSE"
+            ".gitignore"
+            "server.cfg"
+            "local.cfg.example"
+            "permissions.cfg.example"
+            ".env.example"
+            "docker-compose.yaml"
+            "server-icon.png"
+            "docs/README.md"
+            "docs/installation.md"
+            "docs/docker.md"
+            "docs/txadmin.md"
+            "docs/architecture.md"
+            "docs/development.md"
+            "docs/troubleshooting.md"
+            "scripts/README.md"
+            "scripts/setup.ps1"
+            "scripts/start.ps1"
+            "scripts/start.sh"
+            "scripts/update-artifacts.ps1"
+            "resources/README.md"
+            "resources/[system]/README.md"
+            "resources/[standalone]/README.md"
+            "resources/[local]/README.md"
+          )
+
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Missing required file: $file"
+              exit 1
+            fi
+          done
+
+      - name: Validate required directories
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required_dirs=(
+            "docs"
+            "scripts"
+            "resources"
+            "resources/[system]"
+            "resources/[standalone]"
+            "resources/[local]"
+          )
+
+          for dir in "${required_dirs[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "Missing required directory: $dir"
+              exit 1
+            fi
+          done
+
+      - name: Validate ignored runtime files are not tracked
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          forbidden_paths=(
+            "local.cfg"
+            "permissions.cfg"
+            ".env"
+            ".replxx_history"
+            ".cfx-server-data"
+            "server"
+            "cache"
+            "txData"
+          )
+
+          for path in "${forbidden_paths[@]}"; do
+            if git ls-files --error-unmatch "$path" >/dev/null 2>&1; then
+              echo "Forbidden runtime/local path is tracked by Git: $path"
+              exit 1
+            fi
+          done
+
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pillow
+
+      - name: Validate server icon size
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          file server-icon.png
+
+          dimensions="$(python3 - <<'PY'
+          from PIL import Image
+
+          with Image.open("server-icon.png") as image:
+              print(f"{image.width}x{image.height}")
+          PY
+          )"
+
+          if [ "$dimensions" != "96x96" ]; then
+            echo "server-icon.png must be 96x96 PNG, got: $dimensions"
+            exit 1
+          fi
+
+      - name: Validate server configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          grep -q 'set gamename rdr3' server.cfg
+          grep -q 'exec permissions.cfg' server.cfg
+          grep -q 'exec local.cfg' server.cfg
+          grep -q 'ensure sessionmanager-rdr3' server.cfg
+          grep -q 'sets locale "uk-UA"' server.cfg
+          grep -q 'load_server_icon server-icon.png' server.cfg
+
+      - name: Validate examples do not contain real-looking secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          grep -q 'sv_licenseKey "changeme"' local.cfg.example
+          grep -q 'MARIADB_PASSWORD=change_me' .env.example
+          grep -q 'MARIADB_ROOT_PASSWORD=change_me_root' .env.example
+
+          if grep -R --line-number --extended-regexp 'sv_licenseKey "[^"]{20,}"' \
+            --exclude='local.cfg.example' \
+            --exclude-dir='.git' \
+            .; then
+            echo "Possible real Cfx.re license key found in tracked files."
+            exit 1
+          fi
+
+      - name: Validate PowerShell syntax
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $scriptFiles = @(
+            "scripts/setup.ps1",
+            "scripts/start.ps1",
+            "scripts/update-artifacts.ps1"
+          )
+
+          foreach ($scriptFile in $scriptFiles) {
+            Write-Host "Checking PowerShell syntax: $scriptFile"
+
+            $tokens = $null
+            $errors = $null
+
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $scriptFile,
+              [ref] $tokens,
+              [ref] $errors
+            ) | Out-Null
+
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Error
+              exit 1
+            }
+          }
+
+      - name: Validate Docker Compose config
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker compose --env-file .env.example config

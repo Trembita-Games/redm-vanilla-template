@@ -25,6 +25,7 @@ Project documentation and setup guides for `redm-vanilla-template`.
 - [Example Docker Environment](../.env.example)
 - [Server Configuration](../server.cfg)
 - [Docker Compose Configuration](../docker-compose.yaml)
+- [GitHub Actions Validation](../.github/workflows/validate.yaml)
 
 ---
 
