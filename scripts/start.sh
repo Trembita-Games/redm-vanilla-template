@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 cd "$(dirname "$0")/.."
 
 if [ ! -f "server/FXServer" ]; then
@@ -8,4 +10,19 @@ if [ ! -f "server/FXServer" ]; then
     exit 1
 fi
 
-./server/FXServer +exec server.cfg
+if [ ! -f "server.cfg" ]; then
+    echo "[ERROR] server.cfg was not found in the repository root."
+    exit 1
+fi
+
+mkdir -p logs
+
+timestamp="$(date +"%Y%m%d-%H%M%S")"
+log_file="logs/server-${timestamp}.log"
+
+echo "Starting RedM Vanilla Server"
+echo "Root path: $(pwd)"
+echo "Log file: ${log_file}"
+echo ""
+
+./server/FXServer +exec server.cfg 2>&1 | tee "$log_file"
