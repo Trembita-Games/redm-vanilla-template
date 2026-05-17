@@ -41,9 +41,14 @@ redm-vanilla-template/
 |       +-- trembita-resources.cfg.example
 +-- docs/
 +-- scripts/
-|   +-- 01-server-install.ps1
-|   +-- 02-server-setup.ps1
-|   +-- 03-server-run.ps1
+|   +-- windows/
+|   |   +-- 01-server-install.ps1
+|   |   +-- 02-server-setup.ps1
+|   |   +-- 03-server-run.ps1
+|   +-- linux/
+|   |   +-- 01-server-install.sh
+|   |   +-- 02-server-setup.sh
+|   |   +-- 03-server-run.sh
 |   +-- README.md
 +-- docker-compose.yaml
 +-- README.md
@@ -61,10 +66,10 @@ redm-vanilla-template/
 |   +-- FXServer.exe
 |   +-- citizen/
 +-- txData/
-    +-- admins.json
     +-- default/
     |   +-- data/
     |   +-- logs/
+    |   |   +-- dev/
     |   +-- config.json
     +-- dev.base/
         +-- cache/
@@ -100,7 +105,7 @@ https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
 Run:
 
 ```powershell
-./scripts/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
+./scripts/windows/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
 ```
 
 The script recreates:
@@ -124,7 +129,7 @@ Manual installation is also valid if the extracted artifact layout produces `ser
 Run:
 
 ```powershell
-./scripts/02-server-setup.ps1
+./scripts/windows/02-server-setup.ps1
 ```
 
 The setup script creates the txAdmin-compatible runtime layout and copies templates from:
@@ -213,7 +218,7 @@ Use it for local admin identifiers or server-specific permission changes.
 Run:
 
 ```powershell
-./scripts/03-server-run.ps1
+./scripts/windows/03-server-run.ps1
 ```
 
 The script starts:
@@ -247,7 +252,7 @@ Pop-Location
 Logs are written to:
 
 ```txt
-txData/default/logs/
+txData/default/logs/dev/
 ```
 
 ---
@@ -259,8 +264,8 @@ The default profile is `dev`.
 To generate and run another profile:
 
 ```powershell
-./scripts/02-server-setup.ps1 -Profile prod
-./scripts/03-server-run.ps1 -Profile prod
+./scripts/windows/02-server-setup.ps1 -Profile prod
+./scripts/windows/03-server-run.ps1 -Profile prod
 ```
 
 This uses:

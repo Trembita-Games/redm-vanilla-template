@@ -12,10 +12,10 @@ The setup script generates:
 
 ```txt
 txData/
-+-- admins.json
 +-- default/
 |   +-- data/
 |   +-- logs/
+|   |   +-- dev/
 |   +-- config.json
 +-- dev.base/
     +-- cache/
@@ -39,9 +39,9 @@ txData/
 Use the normal lifecycle:
 
 ```powershell
-./scripts/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
-./scripts/02-server-setup.ps1
-./scripts/03-server-run.ps1
+./scripts/windows/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
+./scripts/windows/02-server-setup.ps1
+./scripts/windows/03-server-run.ps1
 ```
 
 During first startup, FXServer may print a txAdmin setup URL in the console.
@@ -106,6 +106,16 @@ txData/dev.base/server-icon.png
 ```
 
 Secrets and permissions are generated locally and should not be committed.
+
+The setup script creates `txData/default/config.json` if missing with:
+
+```json
+{
+  "version": 2
+}
+```
+
+It does not create `txData/admins.json`.
 
 ---
 

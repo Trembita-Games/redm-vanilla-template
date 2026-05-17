@@ -5,7 +5,7 @@
 If startup reports that `server/FXServer.exe` is missing, install artifacts:
 
 ```powershell
-./scripts/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
+./scripts/windows/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
 ```
 
 Expected local path:
@@ -23,7 +23,7 @@ server/FXServer.exe
 If startup reports that `txData/<profile>.base/server.cfg` is missing, generate runtime data:
 
 ```powershell
-./scripts/02-server-setup.ps1
+./scripts/windows/02-server-setup.ps1
 ```
 
 Expected default `dev` config:
@@ -63,7 +63,7 @@ Do not commit generated secrets.
 If resources such as `mapmanager`, `chat`, `spawnmanager`, `sessionmanager-rdr3`, `basic-gamemode`, `hardcap`, `rconlog` or `tg-static-data` are missing, rerun setup:
 
 ```powershell
-./scripts/02-server-setup.ps1
+./scripts/windows/02-server-setup.ps1
 ```
 
 Resources should exist under:
@@ -90,7 +90,7 @@ No such config file: secrets.cfg
 Use:
 
 ```powershell
-./scripts/03-server-run.ps1
+./scripts/windows/03-server-run.ps1
 ```
 
 The run script starts FXServer from:
@@ -114,10 +114,10 @@ Do not start FXServer from the repository root with `+exec txData/dev.base/serve
 The repository expects standalone logs under:
 
 ```txt
-txData/default/logs/
+txData/default/logs/dev/
 ```
 
-Use `scripts/03-server-run.ps1` so logs are written there.
+Use `scripts/windows/03-server-run.ps1` so logs are written under the selected profile log directory.
 
 Repository-root `logs/` is ignored as a legacy/runtime safety net, but it is not the intended runtime log location.
 
@@ -226,7 +226,7 @@ Check:
 
 - `server/FXServer.exe` exists
 - `txData/dev.base/server.cfg` exists
-- the server is started with `scripts/03-server-run.ps1`
+- the server is started with `scripts/windows/03-server-run.ps1`
 - the process working directory is `txData/dev.base/`
 - console output does not show artifact or config errors
 
@@ -239,8 +239,8 @@ txData/
 Then:
 
 ```powershell
-./scripts/02-server-setup.ps1
-./scripts/03-server-run.ps1
+./scripts/windows/02-server-setup.ps1
+./scripts/windows/03-server-run.ps1
 ```
 
 ---

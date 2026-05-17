@@ -29,14 +29,15 @@ jobs:
             "README.md"
             "LICENSE"
             ".gitignore"
+            ".gitattributes"
             "config/templates/server.cfg.example"
             "config/templates/secrets.cfg.example"
             "config/templates/permissions.cfg.example"
             "config/templates/resources.cfg.example"
             "config/templates/trembita-resources.cfg.example"
             "config/.env.example"
-            "docker-compose.yaml"
             "config/server-icon.png"
+            "docker-compose.yaml"
             "docs/README.md"
             "docs/installation.md"
             "docs/docker.md"
@@ -45,9 +46,14 @@ jobs:
             "docs/development.md"
             "docs/troubleshooting.md"
             "scripts/README.md"
-            "scripts/01-server-install.ps1"
-            "scripts/02-server-setup.ps1"
-            "scripts/03-server-run.ps1"
+            "scripts/windows/README.md"
+            "scripts/windows/01-server-install.ps1"
+            "scripts/windows/02-server-setup.ps1"
+            "scripts/windows/03-server-run.ps1"
+            "scripts/linux/README.md"
+            "scripts/linux/01-server-install.sh"
+            "scripts/linux/02-server-setup.sh"
+            "scripts/linux/03-server-run.sh"
           )
 
           for file in "${required_files[@]}"; do
@@ -65,6 +71,8 @@ jobs:
           required_dirs=(
             "docs"
             "scripts"
+            "scripts/windows"
+            "scripts/linux"
             "config"
             "config/templates"
           )
@@ -76,30 +84,156 @@ jobs:
             fi
           done
 
-      - name: Validate ignored runtime files are not tracked
+      - name: Validate generated runtime files are not tracked
         shell: bash
         run: |
           set -euo pipefail
 
-          forbidden_paths=(
+          forbidden_patterns=(
+            "server/*"
+            "txData/*"
+            "cache/*"
+            "logs/*"
+            ".tmp/*"
+            ".redm-server-data-cfx/*"
+            ".redm-server-data/*"
+            ".env"
             "local.cfg"
             "permissions.cfg"
             "server.cfg"
-            ".env"
+            "secrets.cfg"
             ".replxx_history"
-            ".redm-server-data-cfx"
-            ".redm-server-data"
-            "server"
-            "cache"
-            "txData"
           )
 
-          for path in "${forbidden_paths[@]}"; do
-            if git ls-files --error-unmatch "$path" >/dev/null 2>&1; then
-              echo "Forbidden runtime/local path is tracked by Git: $path"
+          for pattern in "${forbidden_patterns[@]}"; do
+            if git ls-files -- "$pattern" | grep -q .; then
+              echo "Forbidden runtime/local path is tracked by Git: $pattern"
+              git ls-files -- "$pattern"
               exit 1
             fi
           done
+
+      - name: Validate .gitignore runtime rules
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required_rules=(
+            "server/"
+            "txData/"
+            ".env"
+          )
+
+          for rule in "${required_rules[@]}"; do
+            if ! grep -Fxq "$rule" .gitignore; then
+              echo "Missing .gitignore rule: $rule"
+              exit 1
+            fi
+          done
+
+      - name: Validate .gitattributes line-ending rules
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required_rules=(
+            "*.sh text eol=lf"
+            "*.ps1 text eol=crlf"
+            "*.md text eol=lf"
+            "*.cfg text eol=lf"
+            "*.json text eol=lf"
+            "*.yaml text eol=lf"
+            "*.png binary"
+            "*.7z binary"
+            "*.zip binary"
+          )
+
+          for rule in "${required_rules[@]}"; do
+            if ! grep -Fxq "$rule" .gitattributes; then
+              echo "Missing .gitattributes rule: $rule"
+              exit 1
+            fi
+          done
+
+      - name: Validate working tree line endings
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if grep -Ilr $'\r' scripts/linux --include='*.sh'; then
+            echo "Linux shell scripts must use LF line endings"
+            exit 1
+          fi
+
+          ps1_files=(
+            "scripts/windows/01-server-install.ps1"
+            "scripts/windows/02-server-setup.ps1"
+            "scripts/windows/03-server-run.ps1"
+          )
+
+          for file in "${ps1_files[@]}"; do
+            if ! grep -q $'\r' "$file"; then
+              echo "PowerShell script should be checked out with CRLF line endings: $file"
+              exit 1
+            fi
+          done
+
+      - name: Validate Linux shell scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          shell_scripts=(
+            "scripts/linux/01-server-install.sh"
+            "scripts/linux/02-server-setup.sh"
+            "scripts/linux/03-server-run.sh"
+          )
+
+          for script in "${shell_scripts[@]}"; do
+            echo "Checking Bash syntax: $script"
+            bash -n "$script"
+
+            mode="$(git ls-files --stage "$script" | awk '{print $1}')"
+            if [ "$mode" != "100755" ]; then
+              echo "Linux script must keep executable bit: $script"
+              exit 1
+            fi
+          done
+
+          if command -v shellcheck >/dev/null 2>&1; then
+            shellcheck "${shell_scripts[@]}"
+          else
+            echo "shellcheck is not available; skipping optional shellcheck validation"
+          fi
+
+      - name: Validate PowerShell syntax
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $scriptFiles = @(
+            "scripts/windows/01-server-install.ps1",
+            "scripts/windows/02-server-setup.ps1",
+            "scripts/windows/03-server-run.ps1"
+          )
+
+          foreach ($scriptFile in $scriptFiles) {
+            Write-Host "Checking PowerShell syntax: $scriptFile"
+
+            $tokens = $null
+            $errors = $null
+
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $scriptFile,
+              [ref] $tokens,
+              [ref] $errors
+            ) | Out-Null
+
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Error
+              exit 1
+            }
+          }
 
       - name: Install Python dependencies
         shell: bash
@@ -129,7 +263,7 @@ jobs:
             exit 1
           fi
 
-      - name: Validate server configuration
+      - name: Validate server configuration templates
         shell: bash
         run: |
           set -euo pipefail
@@ -143,6 +277,98 @@ jobs:
           grep -q 'ensure sessionmanager-rdr3' config/templates/resources.cfg.example
           grep -q 'sets locale "uk-UA"' config/templates/server.cfg.example
           grep -q 'load_server_icon server-icon.png' config/templates/server.cfg.example
+          grep -q 'sv_licenseKey ""' config/templates/secrets.cfg.example
+
+      - name: Validate runtime model references
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          grep -R --line-number --fixed-strings 'Profile = "dev"' scripts/windows
+          grep -R --line-number --fixed-strings '$RuntimeLogPath = Join-Path $RuntimeLogsRootPath $Profile' scripts/windows/03-server-run.ps1
+          grep -R --line-number --fixed-strings 'Write-Host "Runtime logs: txData/$TxAdminControlName/logs/$Profile/"' scripts/windows/03-server-run.ps1
+          grep -R --line-number --fixed-strings '$Profile.base' scripts/windows
+          grep -R --line-number --fixed-strings 'https://github.com/Trembita-Games/redm-server-data-cfx.git' scripts/windows/02-server-setup.ps1
+          grep -R --line-number --fixed-strings 'https://github.com/Trembita-Games/redm-server-data.git' scripts/windows/02-server-setup.ps1
+
+      - name: Validate documentation references
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          markdown_files="$(git ls-files '*.md')"
+
+          required_references=(
+            "scripts/windows/01-server-install.ps1"
+            "scripts/windows/02-server-setup.ps1"
+            "scripts/windows/03-server-run.ps1"
+            "scripts/linux/01-server-install.sh"
+            "scripts/linux/02-server-setup.sh"
+            "scripts/linux/03-server-run.sh"
+            "txData/default/logs/<profile>/"
+            "txData/<profile>.base/"
+            "config/templates/secrets.cfg.example"
+            "txData/<profile>.base/secrets.cfg"
+            "config/server-icon.png"
+            "txData/<profile>.base/server-icon.png"
+          )
+
+          for reference in "${required_references[@]}"; do
+            if ! grep -R --line-number --fixed-strings "$reference" $markdown_files >/dev/null; then
+              echo "Missing expected documentation reference: $reference"
+              exit 1
+            fi
+          done
+
+          forbidden_references=(
+            "update-artifacts.ps1"
+            "scripts/setup.ps1"
+            "scripts/start.ps1"
+            "scripts/01-server-install.ps1"
+            "scripts/02-server-setup.ps1"
+            "scripts/03-server-run.ps1"
+            "local.cfg.example"
+            "txData/<profile>/logs/"
+            "txData/default.base/"
+            "./server.cfg"
+            "./permissions.cfg"
+            "./local.cfg"
+          )
+
+          for reference in "${forbidden_references[@]}"; do
+            if grep -R --line-number --fixed-strings "$reference" $markdown_files; then
+              echo "Outdated documentation reference found: $reference"
+              exit 1
+            fi
+          done
+
+      - name: Validate config template naming
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git ls-files | grep -E '(^|/)local\.cfg(\.example)?$'; then
+            echo "local.cfg templates or runtime configs must not be tracked"
+            exit 1
+          fi
+
+          if git grep --line-number --fixed-strings 'local.cfg.example' -- \
+            ':!txData/**' \
+            ':!server/**' \
+            ':!.gitignore' \
+            ':!.github/workflows/validate.yaml'; then
+            echo "Outdated local.cfg.example reference found"
+            exit 1
+          fi
+
+          if git grep --line-number --fixed-strings 'local.cfg' -- \
+            ':!txData/**' \
+            ':!server/**' \
+            ':!.gitignore' \
+            ':!.github/workflows/validate.yaml'; then
+            echo "Outdated local.cfg reference found"
+            exit 1
+          fi
 
       - name: Validate examples do not contain real-looking secrets
         shell: bash
@@ -156,39 +382,12 @@ jobs:
           if grep -R --line-number --extended-regexp 'sv_licenseKey "[^"]{20,}"' \
             --exclude='secrets.cfg.example' \
             --exclude-dir='.git' \
+            --exclude-dir='txData' \
+            --exclude-dir='server' \
             .; then
-            echo "Possible real Cfx.re license key found in tracked files."
+            echo "Possible real Cfx.re license key found in tracked files"
             exit 1
           fi
-
-      - name: Validate PowerShell syntax
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-
-          $scriptFiles = @(
-            "scripts/01-server-install.ps1",
-            "scripts/02-server-setup.ps1",
-            "scripts/03-server-run.ps1"
-          )
-
-          foreach ($scriptFile in $scriptFiles) {
-            Write-Host "Checking PowerShell syntax: $scriptFile"
-
-            $tokens = $null
-            $errors = $null
-
-            [System.Management.Automation.Language.Parser]::ParseFile(
-              $scriptFile,
-              [ref] $tokens,
-              [ref] $errors
-            ) | Out-Null
-
-            if ($errors.Count -gt 0) {
-              $errors | Format-List | Out-String | Write-Error
-              exit 1
-            }
-          }
 
       - name: Validate Docker Compose config
         shell: bash

@@ -5,9 +5,9 @@ Docker support is optional.
 The validated RedM server runtime is local Windows FXServer through the PowerShell lifecycle:
 
 ```powershell
-./scripts/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
-./scripts/02-server-setup.ps1
-./scripts/03-server-run.ps1
+./scripts/windows/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
+./scripts/windows/02-server-setup.ps1
+./scripts/windows/03-server-run.ps1
 ```
 
 Docker Compose currently provides only a local MariaDB service for future optional modules.

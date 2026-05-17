@@ -15,15 +15,15 @@
 Use the numbered lifecycle:
 
 ```powershell
-./scripts/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
-./scripts/02-server-setup.ps1
-./scripts/03-server-run.ps1
+./scripts/windows/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
+./scripts/windows/02-server-setup.ps1
+./scripts/windows/03-server-run.ps1
 ```
 
 For most documentation or template changes, rerun:
 
 ```powershell
-./scripts/02-server-setup.ps1 -Overwrite
+./scripts/windows/02-server-setup.ps1 -Overwrite
 ```
 
 This regenerates runtime configs from the tracked templates.
@@ -69,7 +69,7 @@ config/templates/
 Then regenerate runtime configs with:
 
 ```powershell
-./scripts/02-server-setup.ps1 -Overwrite
+./scripts/windows/02-server-setup.ps1 -Overwrite
 ```
 
 Local secrets belong in:
@@ -106,9 +106,12 @@ The GitHub Actions workflow checks:
 
 - required tracked files and directories
 - forbidden runtime paths are not tracked
+- script split under `scripts/windows/` and `scripts/linux/`
+- Bash syntax for Linux placeholder scripts
 - server icon dimensions
 - template config expectations
 - PowerShell syntax
+- documentation references
 - Docker Compose config
 
 Run local script syntax checks when changing PowerShell:
@@ -116,7 +119,7 @@ Run local script syntax checks when changing PowerShell:
 ```powershell
 $tokens = $null
 $errors = $null
-[System.Management.Automation.Language.Parser]::ParseFile("scripts/02-server-setup.ps1", [ref] $tokens, [ref] $errors) | Out-Null
+[System.Management.Automation.Language.Parser]::ParseFile("scripts/windows/02-server-setup.ps1", [ref] $tokens, [ref] $errors) | Out-Null
 $errors
 ```
 
@@ -127,9 +130,12 @@ $errors
 Lifecycle scripts are intentionally numbered:
 
 ```txt
-01-server-install.ps1
-02-server-setup.ps1
-03-server-run.ps1
+scripts/windows/01-server-install.ps1
+scripts/windows/02-server-setup.ps1
+scripts/windows/03-server-run.ps1
+scripts/linux/01-server-install.sh
+scripts/linux/02-server-setup.sh
+scripts/linux/03-server-run.sh
 ```
 
 Keep documentation examples in that order.

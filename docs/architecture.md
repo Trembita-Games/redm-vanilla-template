@@ -69,7 +69,7 @@ exec secrets.cfg
 Logs are written to:
 
 ```txt
-txData/default/logs/
+txData/default/logs/<profile>/
 ```
 
 ---
