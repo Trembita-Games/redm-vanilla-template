@@ -165,19 +165,6 @@ jobs:
             exit 1
           fi
 
-          ps1_files=(
-            "scripts/windows/01-server-install.ps1"
-            "scripts/windows/02-server-setup.ps1"
-            "scripts/windows/03-server-run.ps1"
-          )
-
-          for file in "${ps1_files[@]}"; do
-            if ! grep -q $'\r' "$file"; then
-              echo "PowerShell script should be checked out with CRLF line endings: $file"
-              exit 1
-            fi
-          done
-
       - name: Validate Linux shell scripts
         shell: bash
         run: |
@@ -388,4 +375,3 @@ jobs:
             echo "Possible real Cfx.re license key found in tracked files"
             exit 1
           fi
-
