@@ -1,173 +1,168 @@
-﻿# txAdmin Setup
+# txAdmin Setup
 
-txAdmin is the web-based management interface bundled with FXServer.
+txAdmin is bundled with FXServer and stores runtime state under `txData/`.
 
-It is used to manage server startup, configuration, resources, players, logs and runtime administration.
+This repository is txAdmin-compatible, but it does not track txAdmin runtime data.
 
 ---
 
-## Current Scope
+## Runtime Layout
 
-This template is txAdmin-compatible, but it does not store txAdmin runtime data in Git.
-
-txAdmin runtime data is stored locally in:
+The setup script generates:
 
 ```txt
 txData/
++-- admins.json
++-- default/
+|   +-- data/
+|   +-- logs/
+|   +-- config.json
++-- dev.base/
+    +-- cache/
+    +-- resources/
+    +-- permissions.cfg
+    +-- resources.cfg
+    +-- secrets.cfg
+    +-- server.cfg
+    +-- server-icon.png
+    +-- trembita-resources.cfg
 ```
 
-The `txData/` directory is ignored by Git.
+`txData/` is ignored by Git.
+
+`txData/default/` is the stable txAdmin control directory for every script-managed profile. `dev` is the default runtime server profile. Passing `-Profile prod` still uses `txData/default/` and changes only the runtime server directory to `txData/prod.base/`.
 
 ---
 
 ## First Startup
 
-Start the server:
+Use the normal lifecycle:
 
 ```powershell
-./scripts/start.ps1
+./scripts/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
+./scripts/02-server-setup.ps1
+./scripts/03-server-run.ps1
 ```
 
-During the first startup, FXServer should print a txAdmin setup URL in the console.
+During first startup, FXServer may print a txAdmin setup URL in the console.
 
-Open the URL in your browser and follow the setup wizard.
+Open it and use the existing server data/configuration flow when possible.
+
+Main generated config:
+
+```txt
+txData/dev.base/server.cfg
+```
 
 ---
 
-## Recommended Setup Mode
+## Runtime Working Directory
 
-When txAdmin asks how to configure the server, use an existing server data folder / existing configuration flow.
-
-This repository already provides:
+Standalone startup intentionally runs FXServer from:
 
 ```txt
-server.cfg
-permissions.cfg
-local.cfg
-resources/
+txData/dev.base/
 ```
 
-The main server configuration file is:
+and executes:
 
 ```txt
 server.cfg
 ```
 
-Do not let txAdmin overwrite the repository structure unless you intentionally want to regenerate the configuration.
-
----
-
-## Configuration Files
-
-This template uses the following configuration files:
-
-```txt
-server.cfg               -> tracked main server configuration
-permissions.cfg          -> local permissions configuration, ignored by Git
-permissions.cfg.example  -> tracked permissions template
-local.cfg                -> local secrets and machine-specific settings, ignored by Git
-local.cfg.example        -> tracked local configuration template
-```
-
-`server.cfg` executes:
+This matches FXServer path resolution for same-folder config includes:
 
 ```cfg
+exec resources.cfg
+exec trembita-resources.cfg
 exec permissions.cfg
-exec local.cfg
+exec secrets.cfg
 ```
 
-This keeps secrets and local server identifiers outside Git.
+---
+
+## Configuration Sources
+
+Tracked templates:
+
+```txt
+config/templates/server.cfg.example
+config/templates/resources.cfg.example
+config/templates/trembita-resources.cfg.example
+config/templates/permissions.cfg.example
+config/templates/secrets.cfg.example
+config/server-icon.png
+```
+
+Generated runtime files:
+
+```txt
+txData/dev.base/server.cfg
+txData/dev.base/resources.cfg
+txData/dev.base/trembita-resources.cfg
+txData/dev.base/permissions.cfg
+txData/dev.base/secrets.cfg
+txData/dev.base/server-icon.png
+```
+
+Secrets and permissions are generated locally and should not be committed.
+
+---
+
+## Resource Layers
+
+Setup installs resources into:
+
+```txt
+txData/dev.base/resources/
+```
+
+Layer order:
+
+1. official/base resources from `Trembita-Games/redm-server-data-cfx`
+2. Trembita standalone resources from `Trembita-Games/redm-server-data`
+
+The generated `trembita-resources.cfg` currently ensures:
+
+```cfg
+ensure tg-static-data
+```
 
 ---
 
 ## Admin Permissions
 
-By default, `permissions.cfg.example` contains minimal permission rules.
-
-For local development, copy it to:
+Edit local permissions in:
 
 ```txt
-permissions.cfg
+txData/dev.base/permissions.cfg
 ```
-
-Then adjust it for your own Cfx.re identifiers if needed.
 
 Example:
 
 ```cfg
 add_ace group.admin command allow
 add_ace group.admin command.quit deny
-```
-
-If you want to add yourself as an admin, add your real identifier to `permissions.cfg`.
-
-Example format:
-
-```cfg
 add_principal identifier.fivem:YOUR_ID group.admin
 ```
 
-Do not commit real personal identifiers unless they are intentionally public.
+Do not commit real personal identifiers unless intentionally public.
 
 ---
 
 ## Runtime State
 
-txAdmin may generate runtime files and folders such as:
+txAdmin and FXServer may generate additional runtime files under:
 
 ```txt
 txData/
-cache/
+txData/dev.base/cache/
 ```
 
-These are ignored by Git.
-
-Do not commit txAdmin runtime state into this repository.
-
----
-
-## Local Development Notes
-
-For local development, the recommended flow is:
-
-```powershell
-./scripts/update-artifacts.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
-./scripts/setup.ps1
-./scripts/start.ps1
-```
-
-Then complete the txAdmin setup in the browser if prompted.
-
----
-
-## Server Listing and Public Access
-
-txAdmin can help monitor the server, but it does not automatically fix public networking.
-
-If the Cfx.re server list cannot reach your server, check:
-
-- Windows Firewall
-- router port forwarding
-- VPS firewall/security group
-- TCP `30120`
-- UDP `30120`
-- NAT/CG-NAT limitations
-
-See:
-
-- [Troubleshooting](troubleshooting.md)
+Those files are local runtime state and ignored by Git.
 
 ---
 
 ## Notes
 
-txAdmin support in this repository is intentionally minimal.
-
-This template does not currently include:
-
-- txAdmin deployment automation
-- production txAdmin hardening
-- Dockerized txAdmin setup
-- custom txAdmin recipes
-
-Those may be added later if needed.
+This repository does not include txAdmin recipe automation, production txAdmin hardening or Dockerized txAdmin deployment.

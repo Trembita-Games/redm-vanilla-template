@@ -1,0 +1,11 @@
+########################################
+# Default Resources
+########################################
+
+ensure mapmanager
+ensure chat
+ensure spawnmanager
+ensure sessionmanager-rdr3
+ensure basic-gamemode
+ensure hardcap
+ensure rconlog

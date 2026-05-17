@@ -1,0 +1,6 @@
+########################################
+# Trembita Resources
+########################################
+
+# Add project-specific resources here.
+ensure tg-static-data

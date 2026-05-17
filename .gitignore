@@ -4,13 +4,9 @@ server/
 # FXServer console history
 .replxx_history
 
-# External RedM server data clone
+# External RedM server data clones
 .redm-server-data-cfx/
-
-# Runtime-installed default Cfx.re resources
-resources/\[system\]/*
-!resources/\[system\]/README.md
-!resources/\[system\]/.gitkeep
+.redm-server-data/
 
 # Runtime cache
 cache/
@@ -36,9 +32,10 @@ Thumbs.db
 # Environment files
 .env
 
-# Local configuration
-local.cfg
-permissions.cfg
+# Legacy root local configuration
+/local.cfg
+/permissions.cfg
+/server.cfg
 
 # Temporary files
 tmp/

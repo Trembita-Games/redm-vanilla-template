@@ -1,4 +1,4 @@
-﻿name: Validate Repository
+name: Validate Repository
 
 on:
   push:
@@ -29,12 +29,14 @@ jobs:
             "README.md"
             "LICENSE"
             ".gitignore"
-            "server.cfg"
-            "local.cfg.example"
-            "permissions.cfg.example"
-            ".env.example"
+            "config/templates/server.cfg.example"
+            "config/templates/secrets.cfg.example"
+            "config/templates/permissions.cfg.example"
+            "config/templates/resources.cfg.example"
+            "config/templates/trembita-resources.cfg.example"
+            "config/.env.example"
             "docker-compose.yaml"
-            "server-icon.png"
+            "config/server-icon.png"
             "docs/README.md"
             "docs/installation.md"
             "docs/docker.md"
@@ -43,14 +45,9 @@ jobs:
             "docs/development.md"
             "docs/troubleshooting.md"
             "scripts/README.md"
-            "scripts/setup.ps1"
-            "scripts/start.ps1"
-            "scripts/start.sh"
-            "scripts/update-artifacts.ps1"
-            "resources/README.md"
-            "resources/[system]/README.md"
-            "resources/[standalone]/README.md"
-            "resources/[local]/README.md"
+            "scripts/01-server-install.ps1"
+            "scripts/02-server-setup.ps1"
+            "scripts/03-server-run.ps1"
           )
 
           for file in "${required_files[@]}"; do
@@ -68,10 +65,8 @@ jobs:
           required_dirs=(
             "docs"
             "scripts"
-            "resources"
-            "resources/[system]"
-            "resources/[standalone]"
-            "resources/[local]"
+            "config"
+            "config/templates"
           )
 
           for dir in "${required_dirs[@]}"; do
@@ -89,9 +84,11 @@ jobs:
           forbidden_paths=(
             "local.cfg"
             "permissions.cfg"
+            "server.cfg"
             ".env"
             ".replxx_history"
             ".redm-server-data-cfx"
+            ".redm-server-data"
             "server"
             "cache"
             "txData"
@@ -117,18 +114,18 @@ jobs:
         run: |
           set -euo pipefail
 
-          file server-icon.png
+          file config/server-icon.png
 
           dimensions="$(python3 - <<'PY'
           from PIL import Image
 
-          with Image.open("server-icon.png") as image:
+          with Image.open("config/server-icon.png") as image:
               print(f"{image.width}x{image.height}")
           PY
           )"
 
           if [ "$dimensions" != "96x96" ]; then
-            echo "server-icon.png must be 96x96 PNG, got: $dimensions"
+            echo "config/server-icon.png must be 96x96 PNG, got: $dimensions"
             exit 1
           fi
 
@@ -137,24 +134,27 @@ jobs:
         run: |
           set -euo pipefail
 
-          grep -q 'set gamename rdr3' server.cfg
-          grep -q 'exec permissions.cfg' server.cfg
-          grep -q 'exec local.cfg' server.cfg
-          grep -q 'ensure sessionmanager-rdr3' server.cfg
-          grep -q 'sets locale "uk-UA"' server.cfg
-          grep -q 'load_server_icon server-icon.png' server.cfg
+          grep -q 'set gamename rdr3' config/templates/server.cfg.example
+          grep -q 'exec resources.cfg' config/templates/server.cfg.example
+          grep -q 'exec trembita-resources.cfg' config/templates/server.cfg.example
+          grep -q 'exec permissions.cfg' config/templates/server.cfg.example
+          grep -q 'exec secrets.cfg' config/templates/server.cfg.example
+          grep -q 'ensure tg-static-data' config/templates/trembita-resources.cfg.example
+          grep -q 'ensure sessionmanager-rdr3' config/templates/resources.cfg.example
+          grep -q 'sets locale "uk-UA"' config/templates/server.cfg.example
+          grep -q 'load_server_icon server-icon.png' config/templates/server.cfg.example
 
       - name: Validate examples do not contain real-looking secrets
         shell: bash
         run: |
           set -euo pipefail
 
-          grep -q 'sv_licenseKey "changeme"' local.cfg.example
-          grep -q 'MARIADB_PASSWORD=change_me' .env.example
-          grep -q 'MARIADB_ROOT_PASSWORD=change_me_root' .env.example
+          grep -q 'sv_licenseKey ""' config/templates/secrets.cfg.example
+          grep -q 'MARIADB_PASSWORD=redm' config/.env.example
+          grep -q 'MARIADB_ROOT_PASSWORD=redm' config/.env.example
 
           if grep -R --line-number --extended-regexp 'sv_licenseKey "[^"]{20,}"' \
-            --exclude='local.cfg.example' \
+            --exclude='secrets.cfg.example' \
             --exclude-dir='.git' \
             .; then
             echo "Possible real Cfx.re license key found in tracked files."
@@ -167,9 +167,9 @@ jobs:
           $ErrorActionPreference = "Stop"
 
           $scriptFiles = @(
-            "scripts/setup.ps1",
-            "scripts/start.ps1",
-            "scripts/update-artifacts.ps1"
+            "scripts/01-server-install.ps1",
+            "scripts/02-server-setup.ps1",
+            "scripts/03-server-run.ps1"
           )
 
           foreach ($scriptFile in $scriptFiles) {
@@ -195,4 +195,4 @@ jobs:
         run: |
           set -euo pipefail
 
-          docker compose --env-file .env.example config
+          docker compose --env-file config/.env.example config

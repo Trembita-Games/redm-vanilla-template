@@ -1,280 +1,219 @@
 # Installation Guide
 
-This guide explains how to set up and run `redm-vanilla-template` locally.
+This guide describes the current local Windows setup flow.
 
-The currently validated flow is Windows-based and uses PowerShell scripts.
+The repository stores source templates and scripts. Runtime files are generated locally and ignored by Git.
 
 ---
 
 ## Requirements
 
+- Windows
+- PowerShell
+- Git
+- 7-Zip
 - RedM
 - Red Dead Redemption 2
-- FXServer artifacts
-- Git
-- PowerShell
-- 7-Zip
-- Windows
-- Open ports:
-  - TCP `30120`
-  - UDP `30120`
+- Windows FXServer artifacts
+- TCP `30120` and UDP `30120` available
 
 Optional:
 
 - Docker
 - Docker Compose
 
-Docker is only needed for the optional MariaDB service.
+Docker is only used for the optional MariaDB service.
 
 ---
 
-## Repository Layout
-
-Expected local runtime structure:
+## Tracked Source Layout
 
 ```txt
 redm-vanilla-template/
-├── server/
-├── resources/
-├── scripts/
-├── server.cfg
-├── permissions.cfg
-├── permissions.cfg.example
-├── local.cfg
-├── local.cfg.example
-├── docker-compose.yaml
-├── .env.example
-└── .env
-```
-
-Runtime/local files ignored by Git:
-
-```txt
-server/
-local.cfg
-permissions.cfg
-.env
-cache/
-txData/
-resources/[system]/*
-```
-
-Tracked example files:
-
-```txt
-local.cfg.example
-permissions.cfg.example
-.env.example
++-- config/
+|   +-- .env.example
+|   +-- server-icon.png
+|   +-- templates/
+|       +-- permissions.cfg.example
+|       +-- resources.cfg.example
+|       +-- secrets.cfg.example
+|       +-- server.cfg.example
+|       +-- trembita-resources.cfg.example
++-- docs/
++-- scripts/
+|   +-- 01-server-install.ps1
+|   +-- 02-server-setup.ps1
+|   +-- 03-server-run.ps1
+|   +-- README.md
++-- docker-compose.yaml
++-- README.md
 ```
 
 ---
 
-## Download FXServer Artifacts
+## Generated Runtime Layout
 
-Download the latest recommended FXServer artifacts from:
+After installation and setup, local runtime files are generated under:
+
+```txt
+redm-vanilla-template/
++-- server/
+|   +-- FXServer.exe
+|   +-- citizen/
++-- txData/
+    +-- admins.json
+    +-- default/
+    |   +-- data/
+    |   +-- logs/
+    |   +-- config.json
+    +-- dev.base/
+        +-- cache/
+        +-- resources/
+        +-- permissions.cfg
+        +-- resources.cfg
+        +-- secrets.cfg
+        +-- server.cfg
+        +-- server-icon.png
+        +-- trembita-resources.cfg
+```
+
+These paths are generated runtime state and are ignored by Git:
+
+```txt
+server/
+txData/
+.env
+cache/
+logs/
+```
+
+---
+
+## 1. Install FXServer Artifacts
+
+Download or copy a direct Windows FXServer `.7z` artifact URL from:
 
 ```txt
 https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/
 ```
 
-For the first setup, prefer the **latest recommended** build instead of the newest optional build.
-
----
-
-### Option A — PowerShell Artifact Updater
-
-Copy the direct `.7z` artifact download URL from the recommended build page and run:
+Run:
 
 ```powershell
-./scripts/update-artifacts.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
+./scripts/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
 ```
 
-Example:
-
-```powershell
-./scripts/update-artifacts.ps1 -ArtifactUrl "https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/BUILD_ID/server.7z"
-```
-
-The script will:
-
-- download the artifact archive
-- recreate the local `server/` directory
-- extract FXServer artifacts into `server/`
-- verify that `FXServer.exe` exists
-
-The updater requires 7-Zip to be installed and available as `7z.exe`.
-
----
-
-### Option B — Manual Installation
-
-Download the artifact archive manually and extract it into:
+The script recreates:
 
 ```txt
 server/
 ```
 
-Resulting structure:
+and verifies:
 
 ```txt
-redm-vanilla-template/
-├── server/
-│   ├── FXServer.exe
-│   ├── citizen/
-│   └── ...
-├── resources/
-├── scripts/
-├── server.cfg
-└── permissions.cfg
+server/FXServer.exe
 ```
 
-The `server/` directory is ignored by Git and must not be committed.
+Manual installation is also valid if the extracted artifact layout produces `server/FXServer.exe`.
 
 ---
 
-## Install Default Cfx.re Resources
+## 2. Generate Runtime Data and Install Resources
 
-This template does not store default Cfx.re resources directly in the repository.
-
-Run the setup script:
+Run:
 
 ```powershell
-./scripts/setup.ps1
+./scripts/02-server-setup.ps1
 ```
 
-The script temporarily downloads:
+The setup script creates the txAdmin-compatible runtime layout and copies templates from:
 
 ```txt
-https://github.com/Trembita-Games/redm-server-data-cfx
+config/templates/
 ```
 
-Then copies default resources into:
+into:
 
 ```txt
-resources/[system]/
+txData/dev.base/
 ```
 
-After setup, the local structure should look similar to:
+It also copies:
 
 ```txt
-resources/
-├── [system]/
-│   ├── [gamemodes]/
-│   ├── [gameplay]/
-│   ├── [local]/
-│   ├── [managers]/
-│   ├── [system]/
-│   └── [test]/
-├── [standalone]/
-└── [local]/
+config/server-icon.png
 ```
 
-The copied resources are ignored by Git and should not be committed.
+to:
+
+```txt
+txData/dev.base/server-icon.png
+```
+
+Resource layers are installed into:
+
+```txt
+txData/dev.base/resources/
+```
+
+Layer order:
+
+1. official/base resources from `https://github.com/Trembita-Games/redm-server-data-cfx.git`
+2. Trembita standalone resources from `https://github.com/Trembita-Games/redm-server-data.git`
+
+Existing generated config files are preserved unless `-Overwrite` is used.
 
 ---
 
-## Local Configuration
+## 3. Configure Secrets
 
-This repository does not store secrets in `server.cfg`.
-
-The setup script creates:
+Edit:
 
 ```txt
-local.cfg
+txData/dev.base/secrets.cfg
 ```
 
-from:
-
-```txt
-local.cfg.example
-```
-
-if `local.cfg` does not already exist.
-
-You can also create it manually:
-
-```powershell
-Copy-Item local.cfg.example local.cfg
-```
-
-Then set your Cfx.re license key:
+Set:
 
 ```cfg
 sv_licenseKey "your_license_key"
 ```
 
-You can create a license key at:
+Create a license key at:
 
 ```txt
 https://portal.cfx.re/keymaster
 ```
 
-`local.cfg` is ignored by Git and must not be committed.
+Do not commit `txData/dev.base/secrets.cfg`.
 
 ---
 
-## Permissions Configuration
+## 4. Review Permissions
 
-The setup script creates:
+Optional local permissions live at:
 
 ```txt
-permissions.cfg
+txData/dev.base/permissions.cfg
 ```
 
-from:
+This file is generated from:
 
 ```txt
-permissions.cfg.example
+config/templates/permissions.cfg.example
 ```
 
-if `permissions.cfg` does not already exist.
-
-You can also create it manually:
-
-```powershell
-Copy-Item permissions.cfg.example permissions.cfg
-```
-
-`server.cfg` executes:
-
-```cfg
-exec permissions.cfg
-```
-
-`permissions.cfg` is ignored by Git because permissions may contain server-specific identifiers.
+Use it for local admin identifiers or server-specific permission changes.
 
 ---
 
-## Optional Docker Database
+## 5. Start the Server
 
-The vanilla server does not require a database.
-
-However, optional future modules may require MariaDB/MySQL.
-
-To start the optional local MariaDB service, create `.env`:
+Run:
 
 ```powershell
-Copy-Item .env.example .env
-```
-
-Then run:
-
-```bash
-docker compose up -d database
-```
-
-See:
-
-- [Docker Guide](docker.md)
-
----
-
-## Starting the Server
-
-### Windows
-
-```powershell
-./scripts/start.ps1
+./scripts/03-server-run.ps1
 ```
 
 The script starts:
@@ -283,119 +222,103 @@ The script starts:
 server/FXServer.exe
 ```
 
-with:
+from this working directory:
+
+```txt
+txData/dev.base/
+```
+
+and executes:
 
 ```txt
 server.cfg
 ```
 
----
+This working-directory behavior is important because FXServer resolves nested `exec` paths relative to the process working directory.
 
-### Linux
+Equivalent direct command:
 
-```bash
-chmod +x ./scripts/start.sh
-./scripts/start.sh
+```powershell
+Push-Location txData/dev.base
+../../server/FXServer.exe +exec server.cfg
+Pop-Location
 ```
 
-Linux setup automation is not fully implemented yet.
+Logs are written to:
+
+```txt
+txData/default/logs/
+```
 
 ---
 
-## Connecting to the Server
+## Custom Runtime Profile
 
-Open RedM and connect using:
+The default profile is `dev`.
+
+To generate and run another profile:
+
+```powershell
+./scripts/02-server-setup.ps1 -Profile prod
+./scripts/03-server-run.ps1 -Profile prod
+```
+
+This uses:
+
+```txt
+txData/default/
+txData/prod.base/
+```
+
+`txData/default/` is the stable txAdmin control directory for every profile. `-Profile` only changes the runtime server directory under `txData/<profile>.base/`.
+
+---
+
+## Connect
+
+Open RedM and connect locally:
 
 ```txt
 connect 127.0.0.1:30120
 ```
 
-For a remote server, use:
+For remote access, open TCP `30120` and UDP `30120` on the host firewall and network edge.
 
-```txt
-connect YOUR_SERVER_IP:30120
+---
+
+## Optional Database
+
+The vanilla server does not require a database.
+
+To start the optional MariaDB service:
+
+```powershell
+Copy-Item config/.env.example .env
+docker compose up -d database
 ```
 
-Or use the server browser.
+See [Docker Guide](docker.md).
 
 ---
 
 ## txAdmin
 
-txAdmin should initialize during first startup.
-
-Follow the web setup instructions displayed in the server console.
-
-This repository already provides the main server configuration:
-
-```txt
-server.cfg
-```
-
-When possible, use the existing configuration instead of generating a new one.
-
-txAdmin runtime data is stored locally and ignored by Git:
+txAdmin runtime data is stored in:
 
 ```txt
 txData/
 ```
 
-See:
-
-- [txAdmin Setup](txadmin.md)
-
----
-
-## Public Networking
-
-For public access, make sure the following ports are open:
+The stable txAdmin control directory is:
 
 ```txt
-TCP 30120
-UDP 30120
+txData/default/
 ```
 
-If running locally behind a router, configure port forwarding for both TCP and UDP.
-
-If running on a VPS, configure the provider firewall/security group to allow both TCP and UDP traffic on port `30120`.
-
-Public server listing and remote player access should be validated separately from local startup.
-
----
-
-## Expected First Startup Behavior
-
-On first startup, some resources may run Yarn/Webpack build tasks.
-
-You may temporarily see messages such as:
+If txAdmin prompts for setup, use the existing server data/configuration flow and point it at the generated runtime configuration:
 
 ```txt
-Running build tasks on resource webpack
-Running build tasks on resource chat
-Running build tasks on resource sessionmanager-rdr3
+txData/dev.base/server.cfg
 ```
 
-This can be normal.
-
-The important part is that resources eventually start successfully.
-
-See:
-
-- [Troubleshooting](troubleshooting.md)
-
----
-
-## Notes
-
-This template intentionally does not include:
-
-- RP frameworks
-- inventory systems
-- economy systems
-- jobs
-- housing
-- custom gameplay scripts
-- map fixes
-- world streaming fixes
-
-It is a vanilla-first infrastructure baseline for RedM/RDR2 servers.
+See [txAdmin Setup](txadmin.md).

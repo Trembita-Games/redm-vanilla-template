@@ -1,4 +1,4 @@
-﻿services:
+services:
   database:
     image: mariadb:11
     container_name: redm-vanilla-template-db

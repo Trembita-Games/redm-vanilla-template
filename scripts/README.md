@@ -1,83 +1,41 @@
-# Scripts
+# Server Scripts
 
-Utility scripts for setup, startup and maintenance.
+Platform-specific script entrypoints live under `scripts/windows/` and `scripts/linux/`.
 
----
-
-## Windows
-
-### Install default Cfx.re resources
-
-```powershell
-./scripts/setup.ps1
-```
-
-This script temporarily clones `Trembita-Games/redm-server-data-cfx` and copies default resources into:
-
-```txt
-resources/[system]/
-```
-
-It also creates `local.cfg` from `local.cfg.example` if `local.cfg` does not already exist.
+| Platform | Status | Guide |
+|---|---|---|
+| Windows | Implemented | [Windows scripts](windows/README.md) |
+| Linux | Placeholder | [Linux scripts](linux/README.md) |
 
 ---
 
-### Download or update FXServer artifacts
+## Lifecycle
 
-```powershell
-./scripts/update-artifacts.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
-```
+The script-based workflow is organized into three numbered steps:
 
-The artifact updater downloads and extracts FXServer artifacts into:
-
-```txt
-server/
-```
-
-The `server/` directory is ignored by Git.
-
-This script requires 7-Zip.
+| Step | Purpose |
+|---|---|
+| `01` | Install FXServer artifacts into `server/` |
+| `02` | Generate runtime structure and install resource layers |
+| `03` | Start FXServer from `txData/<profile>.base/` |
 
 ---
 
-### Start the server
+## Runtime Model
 
-```powershell
-./scripts/start.ps1
+All platform flows should preserve this layout:
+
+```text
+server/                         -> shared FXServer artifacts
+txData/default/                 -> stable txAdmin-compatible control directory
+txData/default/logs/<profile>/  -> runtime logs
+txData/<profile>.base/          -> script-managed runtime profile directory
 ```
 
-This starts FXServer from:
+The default runtime profile is:
 
-```txt
-server/FXServer.exe
+```text
+dev
 ```
 
-using the root server configuration:
-
-```txt
-server.cfg
-```
-
----
-
-## Linux
-
-### Start the server
-
-```bash
-chmod +x ./scripts/start.sh
-./scripts/start.sh
-```
-
-Linux setup automation is not implemented yet.
-
----
-
-## Script Overview
-
-| Script | Platform | Status | Purpose |
-|---|---|---|---|
-| `setup.ps1` | Windows | Functional | Installs default Cfx.re resources and prepares `local.cfg` |
-| `start.ps1` | Windows | Functional | Starts FXServer using `server.cfg` |
-| `start.sh` | Linux | Basic | Starts FXServer on Linux |
-| `update-artifacts.ps1` | Windows | Functional after Step 5 | Downloads and extracts FXServer artifacts |
+Use the platform-specific README for commands and current implementation status.

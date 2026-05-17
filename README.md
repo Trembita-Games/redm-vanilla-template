@@ -2,289 +2,182 @@
 
 [![Validate Repository](https://github.com/Trembita-Games/redm-vanilla-template/actions/workflows/validate.yaml/badge.svg)](https://github.com/Trembita-Games/redm-vanilla-template/actions/workflows/validate.yaml)
 
-Minimal vanilla-first RedM/RDR2 server infrastructure template focused on clean setup, reproducible local runtime and framework-agnostic architecture.
+Infrastructure-first RedM/RDR2 server bootstrap repository for a deterministic, txAdmin-compatible local runtime.
 
-Created and maintained by members of the Oxbay community under Trembita Games.
-
----
-
-## What Is This?
-
-`redm-vanilla-template` is a clean infrastructure baseline for running a minimal RedM server for Red Dead Redemption 2.
-
-It is designed as a starting point for:
-
-- local RedM/RDR2 server testing
-- open-source RedM infrastructure experiments
-- future standalone RP/gameplay modules
-- reproducible server setup
-- framework-agnostic development
-
-This repository is intentionally lightweight and does not try to be a full RP framework.
+This repository stores source templates, scripts, static config assets, and documentation. It does not store generated FXServer artifacts, runtime resources, local secrets, generated configs, cache, or logs.
 
 ---
 
-## Features
+## Current Model
 
-- Vanilla-first RedM/RDR2 server configuration
-- Clean repository structure
-- Windows PowerShell setup flow
-- FXServer artifact updater
-- Default Cfx.re resource installer
-- Local config templates for secrets and permissions
-- Optional Docker Compose MariaDB service
-- txAdmin-compatible runtime layout
-- Troubleshooting documentation based on real startup testing
-- Framework-agnostic and open-source friendly structure
+Tracked source files live in:
 
----
-
-## What Is Not Included?
-
-This repository does **not** include:
-
-- RP frameworks
-- inventory systems
-- economy systems
-- jobs
-- housing
-- character systems
-- custom gameplay scripts
-- map fixes
-- world streaming fixes
-- large resource packs
-
-Gameplay, RP systems and world fixes should be implemented as separate optional modules.
-
----
-
-## Quick Start
-
-### 1. Clone the Repository
-
-```bash
-git clone git@github.com:Trembita-Games/redm-vanilla-template.git
-cd redm-vanilla-template
+```text
+config/
+docs/
+scripts/
+docker-compose.yaml
 ```
 
----
+Generated runtime files live in:
 
-### 2. Download FXServer Artifacts
-
-Use the artifact updater script with a direct `.7z` artifact URL from the recommended Windows build:
-
-```powershell
-./scripts/update-artifacts.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
-```
-
-Or download and extract artifacts manually into:
-
-```txt
+```text
 server/
+txData/
 ```
 
-Expected structure:
+Runtime layout:
 
-```txt
-redm-vanilla-template/
-├── server/
-│   ├── FXServer.exe
-│   ├── citizen/
-│   └── ...
-├── server.cfg
-└── scripts/
+```text
+server/                         -> shared FXServer artifacts
+txData/default/                 -> stable txAdmin-compatible control directory
+txData/default/data/            -> txAdmin control data directory
+txData/default/logs/<profile>/  -> script-managed runtime logs
+txData/default/config.json      -> generated txAdmin control config
+txData/<profile>.base/          -> script-managed runtime profile directory
+```
+
+The default runtime profile is:
+
+```text
+dev
+```
+
+So the default script-managed runtime profile is:
+
+```text
+txData/dev.base/
 ```
 
 ---
 
-### 3. Install Default Cfx.re Resources
+## Quick Start on Windows
+
+Run commands from the repository root.
+
+Install FXServer artifacts:
 
 ```powershell
-./scripts/setup.ps1
+./scripts/windows/01-server-install.ps1 -ArtifactUrl "PASTE_ARTIFACT_DOWNLOAD_URL_HERE"
 ```
 
-This script installs default Cfx.re resources locally into:
-
-```txt
-resources/[system]/
-```
-
-It also creates local config files from examples if they do not exist:
-
-```txt
-local.cfg
-permissions.cfg
-```
-
----
-
-### 4. Configure Local Secrets
-
-Open:
-
-```txt
-local.cfg
-```
-
-Set your Cfx.re license key:
-
-```cfg
-sv_licenseKey "your_license_key"
-```
-
-You can create a key at:
-
-```txt
-https://portal.cfx.re/keymaster
-```
-
-Do not commit `local.cfg`.
-
----
-
-### 5. Start the Server
+Generate the default `dev` runtime and install resources:
 
 ```powershell
-./scripts/start.ps1
+./scripts/windows/02-server-setup.ps1
 ```
 
-Then connect from RedM:
+Configure the generated secrets file:
 
-```txt
-connect 127.0.0.1:30120
+```text
+txData/dev.base/secrets.cfg
 ```
 
----
-
-## Optional Docker Database
-
-This template includes optional Docker Compose support for a local MariaDB database.
-
-The vanilla server does not require a database, but future modules may need one.
-
-Create `.env` from `.env.example`:
+Start the server:
 
 ```powershell
-Copy-Item .env.example .env
+./scripts/windows/03-server-run.ps1
 ```
 
-Start MariaDB:
+Use another runtime profile:
 
-```bash
-docker compose up -d database
+```powershell
+./scripts/windows/02-server-setup.ps1 -Profile test
+./scripts/windows/03-server-run.ps1 -Profile test
 ```
 
-See:
+That keeps `txData/default/` stable and uses:
 
-- [Docker Documentation](docs/docker.md)
+```text
+txData/test.base/
+```
 
 ---
 
-## Repository Structure
+## Resource Layers
 
-```txt
-redm-vanilla-template/
-├── docs/                    -> Documentation and setup guides
-├── resources/               -> Server resources and local modules
-│   ├── [system]/            -> Runtime-installed default Cfx.re resources
-│   ├── [standalone]/        -> Future standalone modules
-│   └── [local]/             -> Local development resources
-├── scripts/                 -> Setup, startup and maintenance scripts
-├── server/                  -> FXServer artifacts, ignored by Git
-├── docker-compose.yaml      -> Optional MariaDB service
-├── .env.example             -> Example Docker environment variables
-├── local.cfg.example        -> Example local secrets configuration
-├── permissions.cfg.example  -> Example local permissions configuration
-├── server.cfg               -> Main server configuration
-└── server-icon.png          -> Server browser icon
+Setup installs runtime resources into:
+
+```text
+txData/<profile>.base/resources/
+```
+
+Layer order:
+
+1. official/base resources from `https://github.com/Trembita-Games/redm-server-data-cfx.git`
+2. standalone resources from `https://github.com/Trembita-Games/redm-server-data.git`
+
+---
+
+## Config Sources
+
+Tracked templates:
+
+```text
+config/templates/server.cfg.example
+config/templates/resources.cfg.example
+config/templates/trembita-resources.cfg.example
+config/templates/permissions.cfg.example
+config/templates/secrets.cfg.example
+```
+
+Generated runtime configs:
+
+```text
+txData/<profile>.base/server.cfg
+txData/<profile>.base/resources.cfg
+txData/<profile>.base/trembita-resources.cfg
+txData/<profile>.base/permissions.cfg
+txData/<profile>.base/secrets.cfg
+```
+
+Server icon source:
+
+```text
+config/server-icon.png
+```
+
+Runtime server icon:
+
+```text
+txData/<profile>.base/server-icon.png
 ```
 
 ---
 
 ## Scripts
 
-| Script | Platform | Purpose |
-|---|---|---|
-| `scripts/update-artifacts.ps1` | Windows | Downloads and extracts FXServer artifacts |
-| `scripts/setup.ps1` | Windows | Installs default Cfx.re resources and creates local configs |
-| `scripts/start.ps1` | Windows | Starts FXServer with `server.cfg` |
-| `scripts/start.sh` | Linux | Basic Linux startup script |
+- [Scripts overview](scripts/README.md)
+- [Windows scripts](scripts/windows/README.md)
+- [Linux scripts](scripts/linux/README.md)
 
-See:
-
-- [Scripts Documentation](scripts/README.md)
+Windows scripts are the current working implementation. Linux scripts are placeholders.
 
 ---
 
 ## Documentation
 
-- [Documentation Index](docs/README.md)
-- [Installation Guide](docs/installation.md)
-- [Docker Guide](docs/docker.md)
-- [txAdmin Setup](docs/txadmin.md)
-- [Architecture Overview](docs/architecture.md)
-- [Development Guide](docs/development.md)
+- [Documentation index](docs/README.md)
+- [Installation guide](docs/installation.md)
+- [txAdmin notes](docs/txadmin.md)
+- [Docker notes](docs/docker.md)
 - [Troubleshooting](docs/troubleshooting.md)
 
 ---
 
-## Current Validation Status
+## Do Not Commit Runtime Files
 
-Validated locally:
+Generated runtime files are ignored by Git and should stay local:
 
-- FXServer artifacts can be installed into `server/`
-- default Cfx.re resources can be installed with `scripts/setup.ps1`
-- license key works through `local.cfg`
-- server starts with default resources
-- `sessionmanager-rdr3`, `chat`, `webpack`, `mapmanager`, `spawnmanager`, `basic-gamemode`, `hardcap` and `rconlog` start successfully
-- RedM client can connect locally
-- known client-side startup issues are documented
-
-Not yet covered by this repository:
-
-- public server networking validation
-- production hosting hardening
-- full Dockerized FXServer runtime
-- RP/world gameplay modules
-
----
-
-## Philosophy
-
-This project aims to provide a clean and minimal baseline for RedM/RDR2 servers without forcing heavy RP frameworks or large resource packs.
-
-The setup should remain:
-
-- vanilla-first
-- modular
-- reproducible
-- infrastructure-oriented
-- framework-agnostic
-- open-source friendly
-
----
-
-## Roadmap
-
-Completed:
-
-- [x] Repository initialization
-- [x] Basic server configuration
-- [x] Startup scripts
-- [x] Default Cfx.re resources setup
-- [x] FXServer artifact updater
-- [x] Local config templates
-- [x] Docker Compose MariaDB service
-- [x] Troubleshooting documentation
-- [x] Local vanilla startup validation
-
-Planned:
-
-- [ ] Improve Linux setup guide
-- [ ] Expand txAdmin setup documentation
-- [ ] Document public server networking
-- [ ] Investigate FXServer Docker deployment
-- [ ] Add optional standalone modules
+```text
+server/
+txData/
+.env
+logs/
+cache/
+.redm-server-data-cfx/
+.redm-server-data/
+```
 
 ---
 

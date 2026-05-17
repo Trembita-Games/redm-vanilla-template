@@ -1,0 +1,24 @@
+﻿# Default text handling
+* text=auto
+
+# Shell scripts must always use LF
+*.sh text eol=lf
+
+# PowerShell scripts are fine with CRLF on Windows
+*.ps1 text eol=crlf
+
+# Config and documentation files
+*.cfg text eol=lf
+*.example text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.7z binary
+*.zip binary
