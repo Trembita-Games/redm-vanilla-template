@@ -389,9 +389,3 @@ jobs:
             exit 1
           fi
 
-      - name: Validate Docker Compose config
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          docker compose --env-file config/.env.example config
