@@ -91,7 +91,7 @@ jobs:
             "permissions.cfg"
             ".env"
             ".replxx_history"
-            ".cfx-server-data"
+            ".redm-server-data-cfx"
             "server"
             "cache"
             "txData"

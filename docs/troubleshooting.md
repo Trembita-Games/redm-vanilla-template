@@ -77,7 +77,7 @@ Run the setup script:
 ./scripts/setup.ps1
 ```
 
-The setup script temporarily clones `citizenfx/cfx-server-data` and copies default resources into:
+The setup script temporarily clones `Trembita-Games/redm-server-data-cfx` and copies default resources into:
 
 ```txt
 resources/[system]/

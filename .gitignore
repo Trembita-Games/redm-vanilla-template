@@ -4,8 +4,8 @@ server/
 # FXServer console history
 .replxx_history
 
-# External Cfx.re server data clone
-.cfx-server-data/
+# External RedM server data clone
+.redm-server-data-cfx/
 
 # Runtime-installed default Cfx.re resources
 resources/\[system\]/*

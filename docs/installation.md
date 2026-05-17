@@ -145,7 +145,7 @@ Run the setup script:
 The script temporarily downloads:
 
 ```txt
-https://github.com/citizenfx/cfx-server-data
+https://github.com/Trembita-Games/redm-server-data-cfx
 ```
 
 Then copies default resources into:

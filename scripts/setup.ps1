@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $RootPath = Resolve-Path (Join-Path $PSScriptRoot "..")
 
-$TempServerDataPath = Join-Path $RootPath ".cfx-server-data"
+$TempServerDataPath = Join-Path $RootPath ".redm-server-data-cfx"
 $SystemResourcesPath = Join-Path $RootPath "resources/[system]"
 
 $LocalExamplePath = Join-Path $RootPath "local.cfg.example"
@@ -60,23 +60,23 @@ if (-not (Test-Path -LiteralPath $SystemResourcesPath)) {
 }
 
 if (Test-Path -LiteralPath $TempServerDataPath) {
-    Write-Host "Removing existing temporary Cfx.re server data clone..."
+    Write-Host "Removing existing temporary RedM server data clone..."
     Remove-Item -LiteralPath $TempServerDataPath -Recurse -Force
 }
 
-Write-Host "Cloning Cfx.re default server data..."
-git clone https://github.com/citizenfx/cfx-server-data.git $TempServerDataPath
+Write-Host "Cloning RedM default server data..."
+git clone https://github.com/Trembita-Games/redm-server-data-cfx.git $TempServerDataPath
 
 $SourceResourcesPath = Join-Path $TempServerDataPath "resources"
 
 if (-not (Test-Path -LiteralPath $SourceResourcesPath)) {
-    Write-Error "Default resources directory was not found in cloned cfx-server-data repository."
+    Write-Error "Default resources directory was not found in cloned redm-server-data-cfx repository."
 }
 
 Write-Host "Copying default resources into resources/[system]..."
 Copy-Item -Path (Join-Path $SourceResourcesPath "*") -Destination $SystemResourcesPath -Recurse -Force
 
-Write-Host "Removing temporary Cfx.re server data clone..."
+Write-Host "Removing temporary RedM server data clone..."
 Remove-Item -LiteralPath $TempServerDataPath -Recurse -Force
 
 Copy-ExampleConfigIfMissing `

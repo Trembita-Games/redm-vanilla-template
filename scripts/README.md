@@ -12,7 +12,7 @@ Utility scripts for setup, startup and maintenance.
 ./scripts/setup.ps1
 ```
 
-This script temporarily clones `citizenfx/cfx-server-data` and copies default resources into:
+This script temporarily clones `Trembita-Games/redm-server-data-cfx` and copies default resources into:
 
 ```txt
 resources/[system]/
