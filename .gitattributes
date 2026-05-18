@@ -1,24 +1,39 @@
-﻿# Default text handling
+# Default text handling
 * text=auto
 
-# Shell scripts must always use LF
+# Lua source files
+*.lua text eol=lf
+
+# Shell scripts
 *.sh text eol=lf
 
-# PowerShell scripts are fine with CRLF on Windows
+# PowerShell scripts
 *.ps1 text eol=crlf
 
 # Config and documentation files
 *.cfg text eol=lf
+*.conf text eol=lf
 *.example text eol=lf
+*.ini text eol=lf
 *.md text eol=lf
 *.json text eol=lf
+*.xml text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+*.txt text eol=lf
 
-# Binary files
+# GitHub / CI
+.github/** text eol=lf
+
+# Resource manifests
+fxmanifest.lua text eol=lf
+
+# Binary assets
 *.png binary
 *.jpg binary
 *.jpeg binary
+*.gif binary
 *.ico binary
 *.7z binary
 *.zip binary
+*.rar binary

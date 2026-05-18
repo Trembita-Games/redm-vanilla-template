@@ -1,46 +1,42 @@
-# FXServer artifacts
-server/
-
-# FXServer console history
-.replxx_history
-
-# External RedM server data clones
-.redm-server-data-cfx/
-.redm-server-data/
-
 # Runtime cache
 cache/
-
-# txAdmin runtime data
 txData/
 
 # Logs
 *.log
 logs/
 
-# Crash dumps
-crashes/
+# Temporary files
+tmp/
+temp/
+.tmp/
 
 # OS files
 .DS_Store
 Thumbs.db
 
 # IDE
-.idea/
 .vscode/
+
+# Rider / IntelliJ local files
+.idea/
 
 # Environment files
 .env
-
-# Legacy root local configuration
-/local.cfg
-/permissions.cfg
-/server.cfg
-
-# Temporary files
-tmp/
-temp/
-.tmp/
+.env.local
+.env.*.local
 
 # Node modules
 node_modules/
+
+# Lua temporary files
+*.luac
+
+# Build / distribution
+dist/
+build/
+artifacts/
+
+# Archives generated locally
+*.7z
+*.rar
