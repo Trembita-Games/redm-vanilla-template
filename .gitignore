@@ -1,15 +1,11 @@
-# Runtime cache
-cache/
+# Runtime output
+server/
 txData/
 
-# Logs
-*.log
-logs/
-
-# Temporary files
-tmp/
-temp/
+# Temporary setup files
 .tmp/
+.redm-server-data-cfx/
+.redm-server-data/
 
 # OS files
 .DS_Store
@@ -23,20 +19,11 @@ Thumbs.db
 
 # Environment files
 .env
-.env.local
-.env.*.local
 
 # Node modules
 node_modules/
 
-# Lua temporary files
-*.luac
-
-# Build / distribution
-dist/
-build/
-artifacts/
-
 # Archives generated locally
 *.7z
 *.rar
+*.zip
